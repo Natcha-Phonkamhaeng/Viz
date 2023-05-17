@@ -9,7 +9,6 @@ import numpy as np
 dash.register_page(__name__, path='/', name='Dishonoured Cheque')
 
 df = pd.read_excel('chq.xlsx')
-print(df.head(1))
 
 months = ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar']
 
