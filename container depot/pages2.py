@@ -11,9 +11,6 @@ from datetime import datetime
 dash.register_page(__name__, path='/page-2', name='Container Deposit')
 today = datetime.today()
 
-
-df = px.data.gapminder().query("year == 2007")
-
 dfIdms = pd.read_excel('idms2.xlsx')
 dfIdms['Date'] = dfIdms['date'].dt.strftime('%d-%m-%Y')
 
@@ -33,7 +30,7 @@ fig.add_trace(go.Bar(x=months, y=y_value('chq received'),
                 ))
 fig.add_trace(go.Bar(x=months, y=y_value('chq returned'),
                 base=[-x for x in y_value('chq returned')],
-                hovertemplate=[ "{:,}".format(y) for y in y_value('chq returned')],
+                hovertemplate=["({} {:,})".format(x,y) for x,y in zip(months, y_value('chq returned'))],
                 marker_color='crimson',
                 name='returned'))
 fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='#dae1e6', margin=dict(l=0,r=0,b=0,t=25))
