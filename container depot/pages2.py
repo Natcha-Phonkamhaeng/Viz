@@ -5,11 +5,9 @@ import pandas as pd
 import plotly.express as px
 import dash_ag_grid as dag
 import plotly.graph_objects as go
-from datetime import datetime
 
 
 dash.register_page(__name__, path='/page-2', name='Container Deposit')
-today = datetime.today()
 
 dfIdms = pd.read_excel('idms2.xlsx')
 dfIdms['Date'] = dfIdms['date'].dt.strftime('%d-%m-%Y')
@@ -73,17 +71,19 @@ layout = dbc.Container([
 			my_graph := dcc.Graph(figure=fig)
 			], width=9),
 		dbc.Col([
+			my_radio := dcc.RadioItems(options=['Cheque', 'Insurance'], value='Cheque', inline=True, labelStyle= {"margin":"1rem"}),
 			html.Label('Year', className='bg-primary text-white'),
-			continent_drop := dcc.Dropdown([x for x in dfIdms['year'].unique()]),
+			year_drop := dcc.Dropdown([x for x in dfIdms['year'].unique()]),
 			html.Label('Month', className='bg-primary text-white'),
-			country_drop := dcc.Dropdown([x for x in dfIdms['month'].unique()], multi=True),
+			month_drop := dcc.Dropdown([x for x in dfIdms['month'].unique()], multi=True),
+			html.Label('Viewed By', className='bg-primary text-white'),
+			view_drop := dcc.Dropdown(['Montly', 'Daily'], placeholder='Montly'),
 			], width=3),
 		]),
 	html.Br(),
 	dbc.Row([
 		dbc.Col([
-				dag.AgGrid(
-			    id="my-table",
+				my_table := dag.AgGrid(
 			    rowData=dfIdms.to_dict("records"),                                                         
 			    columnDefs=[
 			    {
@@ -118,8 +118,37 @@ layout = dbc.Container([
 			    columnSize="sizeToFit",
 			    dashGridOptions={"pagination": True, "paginationPageSize":5,"domLayout": "autoHeight"},
 			    className="ag-theme-alpine color-fonts",
-				),
-				html.Label(f'Last update: {today.day}/{today.month}/{today.year}')
+				)
 			])
 		])
 	])
+
+
+@callback(
+	Output(my_graph, 'figure'),
+	Output(my_table, 'rowData'),
+	Input(my_radio, 'value'),
+	Input(year_drop, 'value'),
+	Input(month_drop, 'value'),
+	Input(view_drop, 'value')
+	)
+def update(select_radio, select_year, select_month, select_view):
+	dff = dfIdms.copy()
+	if select_radio == 'Cheque' and select_year is not None and select_month is not None and select_view is not None:
+		mask = (dff['year'] == select_year) & (dff['month'].isin(select_month))
+		dff = dff[mask]
+		if select_view == 'Daily':
+			fig1 = go.Figure()
+			fig1.add_trace(go.Line(x=dff['date'].tolist(), y=dff['chq received'].tolist(), marker_color='green', name='received'))
+			fig1.add_trace(go.Line(x=dff['date'].tolist(), y=dff['chq returned'].tolist(), marker_color='red', name='returned'))
+			return fig1, dff.to_dict('records')
+
+		return fig, dff.to_dict('records')
+	else:
+		return fig, dfIdms.to_dict("records")
+
+
+
+
+
+
