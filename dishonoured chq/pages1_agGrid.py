@@ -5,10 +5,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 import dash_ag_grid as dag
-from datetime import datetime
+
 
 dash.register_page(__name__, path='/', name='Dishonoured Cheque')
-today = datetime.today()
 
 df = pd.read_excel('chq.xlsx')
 
@@ -82,8 +81,7 @@ layout = dbc.Container([
 		        columnSize="autoSize",
 			    dashGridOptions={"pagination": True, "paginationPageSize":5, "domLayout": "autoHeight"},
 			    className="ag-theme-alpine",  # https://dashaggrid.pythonanywhere.com/layout/themes
-				),
-			html.Label(f'last update: {today.day}/{today.month}/{today.year}')
+				)
 			])
 		])
 	])
