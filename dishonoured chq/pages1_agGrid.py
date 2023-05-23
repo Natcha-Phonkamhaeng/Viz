@@ -35,7 +35,7 @@ bound = pd.DataFrame.from_dict({
 	})
 
 
-fig1 = px.sunburst(bound, path=['Year', 'Month', 'Bound'], values='Volume', color='Volume', title='Bound by month')
+fig1 = px.sunburst(bound, path=['Year', 'Month', 'Bound'], values='Volume', color='Bound', title='Bound by month')
 
 
 layout = dbc.Container([
