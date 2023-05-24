@@ -9,7 +9,7 @@ import plotly.graph_objects as go
 dash.register_page(__name__, path='/page-2', name='Container Deposit')
 
 
-dfIdms = pd.read_excel('idms2.xlsx')
+dfIdms = pd.read_excel('data/idms2.xlsx')
 dfIdms['Date'] = dfIdms['date'].dt.strftime('%d-%m-%Y')
 
 months = dfIdms['month'].unique().tolist()
@@ -27,6 +27,36 @@ fig = go.Figure(
 )
 
 fig.update_layout(template='simple_white')
+
+col = [
+	    {
+	    	'field': 'Date',
+	    	"headerClass": 'center-header',
+	    	'cellStyle': {'textAlign': 'center'},
+	    },
+	    {
+	    	'field': 'chq received',
+	    	"valueFormatter": {"function": 'd3.format("(,.2f")(params.value)'},
+	    	'type': 'rightAligned',
+	    	"cellStyle": {"color": "green"},
+	    },
+	    {
+	    	'field': 'vol chq received',
+	    	'type': 'rightAligned',
+	    	"cellStyle": {"color": 'green'},
+	    },
+	    {
+	    	'field': 'chq returned',
+	    	"valueFormatter": {"function": 'd3.format("(,.2f")(params.value)'},
+	    	'type': 'rightAligned',
+	    	"cellStyle": {"color": "red"},
+	    },
+	    {
+	    	'field': 'vol chq returned',
+	    	'type': 'rightAligned',
+	    	"cellStyle": {"color": "red"},
+	    },
+	]
 
 
 layout = dbc.Container([
@@ -79,35 +109,7 @@ layout = dbc.Container([
 		dbc.Col([
 				my_table := dag.AgGrid(
 			    rowData=dfIdms.to_dict("records"),                                                         
-			    columnDefs=[
-			    {
-			    	'field': 'Date',
-			    	"headerClass": 'center-header',
-			    	'cellStyle': {'textAlign': 'center'},
-			    },
-			    {
-			    	'field': 'chq received',
-			    	"valueFormatter": {"function": 'd3.format("(,.2f")(params.value)'},
-			    	'type': 'rightAligned',
-			    	"cellStyle": {"color": "green"},
-			    },
-			    {
-			    	'field': 'vol chq received',
-			    	'type': 'rightAligned',
-			    	"cellStyle": {"color": 'green'},
-			    },
-			    {
-			    	'field': 'chq returned',
-			    	"valueFormatter": {"function": 'd3.format("(,.2f")(params.value)'},
-			    	'type': 'rightAligned',
-			    	"cellStyle": {"color": "red"},
-			    },
-			    {
-			    	'field': 'vol chq returned',
-			    	'type': 'rightAligned',
-			    	"cellStyle": {"color": "red"},
-			    },
-			    ],                                          
+			    columnDefs=col,                                          
 			    defaultColDef={"resizable": True, "sortable": True, "filter": True, "minWidth":115},
 			    columnSize="sizeToFit",
 			    dashGridOptions={"pagination": True, "paginationPageSize":5,"domLayout": "autoHeight"},
@@ -120,6 +122,7 @@ layout = dbc.Container([
 @callback(
 	Output(my_graph, 'figure'),
 	Output(my_table, 'rowData'),
+	Output(my_table, 'columnDefs'),
 	Input(my_radio, 'value'), 
 	Input(year_drop, 'value'),
 	Input(month_drop, 'value'),
@@ -140,49 +143,38 @@ def update(select_radio, select_year, select_month, select_view):
 			    	]
 				)
 				fig1.update_layout(template='simple_white', barmode='stack')
-				return fig1, dff.to_dict('records')
-			return fig, dff.to_dict('records')
+				return fig1, dff.to_dict('records'), col
+			return fig, dff.to_dict('records'), col
 		else:
-			return fig, dfIdms.to_dict('records')
+			return fig, dfIdms.to_dict('records'), col
+	
 	elif select_radio == 'Insurance':
 		fig2 = px.area(dff, x=months, y=y_value('insurance received'))
 		fig2.update_layout(yaxis={'title': 'Received Amount'}, xaxis={'title': ''})
-		return fig2, dfIdms.to_dict('records')
+		
+		colIns =[
+	    {
+	    	'field': 'Date',
+	    	"headerClass": 'center-header',
+	    	'cellStyle': {'textAlign': 'center'},
+	    },
+	    {
+	    	'field': 'insurance received',
+	    	'type': 'rightAligned',
+	    	"valueFormatter": {"function": 'd3.format("(,.2f")(params.value)'},
+	    },
+	    {
+	    	'field': 'vol insurance received',
+	    	'type': 'rightAligned',
+	    }
+	 ]
 
-# @callback(
-# 	Output(my_graph, 'figure'),
-# 	Input(view_drop, 'value'),
-# 	Input(my_radio, 'value')
-# 	)
-# def update_graph(select_view, select_radio):
-# 	dff = dfIdms.copy()
-
-# 	if select_radio == 'Cheque':
-# 		if select_view == 'Transaction':
-# 			fig1 = go.Figure(
-# 		    data=[
-# 		        go.Bar(name='received', x=months, y=y_value('vol chq received'), marker_color='green', text=y_value('vol chq received')),
-# 		        go.Bar(name='returned', x=months, y=y_value('vol chq returned'),marker_color='red', text=y_value('vol chq returned'))
-# 		    	]
-# 			)
-
-# 			fig1.update_layout(template='simple_white', barmode='stack')
-# 			return fig1
-# 		else:
-# 			return fig
-	# if select_radio == 'Insurance':
-	# 	if select_view == 'Total Amt':
-	# 		print('yes')
-	# 		fig2 = px.area(dff, x=months, y=y_value('insurance received'))
-	# 		fig2.update_layout(yaxis={'title': 'Received Amount'}, xaxis={'title': ''})
-	# 		return fig2
-	# 	else:
-	# 		pass
-
-
-
-
-
-
-
-
+		if select_year is not None and select_month is not None:
+			mask = (dff['year'] == select_year) & (dff['month'].isin(select_month))
+			dff = dff[mask]
+			if select_view == 'Transaction':
+				fig1 = go.Figure(data=[go.Bar(x=months, y=y_value('vol insurance received'))])
+				fig1.update_layout(template='simple_white')
+				return fig1, dff.to_dict('records'), colIns
+			return fig2, dff.to_dict('records'), colIns
+		return fig2, dfIdms.to_dict('records'), colIns
