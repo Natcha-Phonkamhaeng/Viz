@@ -13,9 +13,9 @@ SIDEBAR_STYLE = {
     "top": 0,
     "left": 0,
     "bottom": 0,
-    "width": "15rem",
+    "width": "18rem",
     "padding": "2rem 1rem",
-    "background-color": "#f8f9fa",
+    "background-color": magenta #"#f8f9fa",
 }
 
 # the styles for the main content position it to the right of the sidebar and
@@ -29,14 +29,27 @@ CONTENT_STYLE = {
 }
 
 sidebar = html.Div([
-    html.Img(src='assets/logo.png'),
-    html.Div(['Created By', html.Br(),'Natcha Phonkamhaeng'], style={'height': '1px', 'font-size':'15px'}),
+    dbc.Card([
+        dbc.CardBody([
+            html.Img(src='assets/logo.png'),
+            ],className='text-center',
+            )
+        ]),
+    html.Br(),
+    html.Div(['Created By', html.Br(),'Natcha Phonkamhaeng'], style={'height': '1px', 'font-size':'18px', 'color':'white'}),
     html.Br(),
     html.Br(),
-    html.Hr(),
+    html.Hr(
+        style={
+            "borderWidth": "0.3vh",
+            "width": "100%",
+            "borderColor": "#3294a8",
+            "opacity": "unset",
+        }
+        ),
     dbc.Nav([
         dbc.NavLink([
-            html.Div(page['name'], className='ms-2')
+            html.Div(page['name'], className='ms-2 text-white')
             ],
             href=page['path'],
             active='exact',
