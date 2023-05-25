@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 
 dash.register_page(__name__, path='/page-2', name='Container Deposit')
 
-
+magenta = '#db0f72'
 dfIdms = pd.read_excel('data/idms2.xlsx')
 dfIdms['Date'] = dfIdms['date'].dt.strftime('%d-%m-%Y')
 
@@ -64,28 +64,31 @@ layout = dbc.Container([
 		dbc.Col([
 			dbc.Card(
 				dbc.CardBody([
-					html.H5("Number of Expire Chq", className='text-black'),
-					html.H2("1", className='text-black'),
-					]),
-				color= '#d8f2f0'
+					html.H4(children=[html.I(className="bi bi-emoji-angry me-2"), "Number of Expire Chq"],className="text-nowrap"),
+					html.H4("1"),
+					],className="border-start border-danger border-5"
+					),
+				className='text-center m-4 bg-primary text-white',
 				)
 			]),
 		dbc.Col([
 			dbc.Card(
 				dbc.CardBody([
-					html.H5("Customer Chq Expire", className='text-black'),
-					html.H2("ABC Company Limited", className='text-black'),
-					]),
-				color= '#f2d8d8'
+					html.H4(children=[html.I(className="bi bi-currency-exchange me-2"), "Customer Chq Expire"],className="text-nowrap"),
+					html.H4("ABC Company Limited", className="text-nowrap"),
+					],className="border-start border-danger border-5"
+					),
+				className='text-center m-4 bg-primary text-white',
 				)
 			]),
 		dbc.Col([
 			dbc.Card(
 				dbc.CardBody([
-					html.H5("Details Chq Expire"),
-					html.H2("1,234.00 / KBank 1234567"),
-					]),
-				color= '#f2f1d8'
+					html.H4(children=[html.I(className="bi bi-bank me-2"), "Detail Chq Expire"], className="text-nowrap"),
+					html.H4("1,234.00 / KBank 1234567", className="text-nowrap"),
+					],className="border-start border-danger border-5"
+					),
+				className='text-center m-4 bg-primary text-white',
 				)
 			])
 		]),
