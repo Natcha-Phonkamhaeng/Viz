@@ -2,7 +2,10 @@ import dash
 import dash_bootstrap_components as dbc
 from dash import Dash, html, Output, Input, dcc
 
-app = dash.Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
+app = dash.Dash(__name__, use_pages=True, external_stylesheets=[dbc.themes.SPACELAB, dbc.icons.BOOTSTRAP])
+server = app.server
+
+magenta = '#db0f72'
 
 # the style arguments for the sidebar. We use position:fixed and a fixed width
 SIDEBAR_STYLE = {
@@ -18,7 +21,7 @@ SIDEBAR_STYLE = {
 # the styles for the main content position it to the right of the sidebar and
 # add some padding.
 CONTENT_STYLE = {
-    "margin-left": "10rem",
+    "margin-left": "5rem",
     #"margin-right": '5rem',
     #'padding': '2rem'
     #'margin-right': '10%',
@@ -52,42 +55,10 @@ app.layout = dbc.Container([
         dbc.Col([
             dash.page_container
             ],
-            style=CONTENT_STYLE, width={'size':11})
+            style=CONTENT_STYLE, width={'size':12})
         ])
     ])
 
 
 if __name__ == '__main__':
     app.run_server(debug=True)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
