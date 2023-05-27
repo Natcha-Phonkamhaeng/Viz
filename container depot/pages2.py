@@ -108,7 +108,12 @@ layout = dbc.Container([
 			view_drop := dcc.Dropdown(['Total Amt', 'Transaction'], placeholder='Total Amt')
 			], width=3),
 		]),
-	html.Br(),
+	dbc.Row([
+		dbc.Col([
+			my_btn := dbc.Button(children=[html.I(className='bi bi-cloud-arrow-down me-2'), 'Download Excel']),
+			download := dcc.Download()
+			])
+		], className='mb-2'),
 	dbc.Row([
 		dbc.Col([
 				my_table := dag.AgGrid(
@@ -130,13 +135,13 @@ layout = dbc.Container([
 	Input(my_radio, 'value'), 
 	Input(year_drop, 'value'),
 	Input(month_drop, 'value'),
-	Input(view_drop, 'value')
+	Input(view_drop, 'value'),
 	)
 def update(select_radio, select_year, select_month, select_view):
 	dff = dfIdms.copy()
 
 	if select_radio == 'Cheque':
-		if select_year is not None and select_month is not None:
+		if select_year and select_month:
 			mask = (dff['year'] == select_year) & (dff['month'].isin(select_month))
 			dff = dff[mask]
 			if select_view == 'Transaction':
@@ -173,7 +178,7 @@ def update(select_radio, select_year, select_month, select_view):
 	    }
 	 ]
 
-		if select_year is not None and select_month is not None:
+		if select_year and select_month:
 			mask = (dff['year'] == select_year) & (dff['month'].isin(select_month))
 			dff = dff[mask]
 			if select_view == 'Transaction':
@@ -182,3 +187,16 @@ def update(select_radio, select_year, select_month, select_view):
 				return fig1, dff.to_dict('records'), colIns
 			return fig2, dff.to_dict('records'), colIns
 		return fig2, dfIdms.to_dict('records'), colIns
+
+
+@callback(
+	Output(download, 'data'),
+	Input(my_btn, 'n_clicks'),
+	prevent_initial_call = True,
+	)
+def download(n_clicks):
+	dff = dfIdms.copy()
+	dff['date'] = dff['date'].dt.strftime('%d-%m-%Y')
+	dff = dff.drop(columns=['Date'])
+	output = dcc.send_data_frame(dff.to_excel, "container deposit.xlsx", sheet_name="Sheet_1", index=False)
+	return output
