@@ -9,6 +9,51 @@
     --ag-header-background-color: #db0f72; /*magenta*/
     --ag-odd-row-background-color: rgb(0, 0, 0, 0.05);
     --ag-header-column-resize-handle-color: rgb(126, 46, 132);
-
     --ag-font-size: 17px;
+}
+
+/* apply to all dropdown in dashboard*/
+/* input box */
+.Select-control {
+    background-color: #db0f72; /*magenta*/
+}
+
+
+/* changes the text color of input box */
+.Select-value-label {
+    color: rgb(204, 245, 172) !important;
+}
+
+.Select--single > .Select-control .Select-value, .Select-placeholder {
+    border: 1px solid grey;
+    border-radius: 1px;
+}
+
+
+/* dropdown menu options */
+.VirtualizedSelectOption {
+    background-color: #db0f72; /*magenta*/
+    color: rgb(204, 245, 172);
+ }
+
+
+/* dropdown menu hover effect */
+.VirtualizedSelectFocusedOption {
+    background-color: black;
+    opacity: .7;
+}
+
+
+/* border on focus - default is blue
+ * shadow box around input box.  default is blue
+ */
+.is-focused:not(.is-open) > .Select-control {
+  border-color: var(--primary); 
+  box-shadow: none;
+}
+
+
+/* this colors the input box text and x  of multi dropdown*/
+.Select--multi .Select-value {
+  color: white;
 }
