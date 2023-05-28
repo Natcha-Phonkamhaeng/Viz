@@ -13,7 +13,7 @@ magenta = '#db0f72'
 df = pd.read_excel('data/chq.xlsx')
 
 months = ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar']
-monthYr = ['Apr22','May22','Jun22','Jul22','Aug22','Sep22','Oct22','Nov22','Dec22','Jan22','Feb22', 'Mar22',
+monthYr = ['Apr22','May22','Jun22','Jul22','Aug22','Sep22','Oct22','Nov22','Dec22','Jan23','Feb23', 'Mar23',
 			'Apr23']
 vol = [4,1,4,2,1,1,1,1,0,4,1,0,1]
 
@@ -116,7 +116,7 @@ def update(select_radio, select_year, select_month):
 	dff = df.copy()
 	if select_radio == 'Time Series':
 		figLine = go.Figure(data=[
-		go.Scatter(x=months, y=[4,1,4,2,1,1,1,1,0,4,1,0], line=dict(color=magenta))
+		go.Scatter(x=monthYr, y=[4,1,4,2,1,1,1,1,0,4,1,0], line=dict(color=magenta))
 		],
 		layout_yaxis_range=[0,5])
 
@@ -139,6 +139,9 @@ def update(select_radio, select_year, select_month):
 			dff = dff[mask]
 			return fig, dff.to_dict('records')
 		return fig, df.to_dict('records')
+	
+
+
 	
 
 
