@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 import pandas as pd
 import dash_ag_grid as dag
 
-dash.register_page(__name__, path='/', name='Dishonoured Cheque')
+dash.register_page(__name__, path='/', name='Dishonoured Cheque', order=1)
 
 magenta = '#db0f72'
 
@@ -14,8 +14,8 @@ df = pd.read_excel('data/chq.xlsx')
 
 months = ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar']
 monthYr = ['Apr22','May22','Jun22','Jul22','Aug22','Sep22','Oct22','Nov22','Dec22','Jan23','Feb23', 'Mar23',
-			'Apr23']
-vol = [4,1,4,2,1,1,1,1,0,4,1,0,1]
+			'Apr23', 'May23']
+vol = [4,1,4,2,1,1,1,1,0,4,1,0,1,1]
 
 dfTime = pd.DataFrame.from_dict({
 	'Month' : monthYr,
@@ -24,7 +24,7 @@ dfTime = pd.DataFrame.from_dict({
 
 fig = go.Figure(data=[
 	go.Bar(name='FY22', x=months, y=[4,1,4,2,1,1,1,1,0,4,1,0]),
-	go.Bar(name='FY23', x=months, y=[1]),
+	go.Bar(name='FY23', x=months, y=[1,1]),
 	],
 	layout_yaxis_range=[0,5]
 	)
@@ -36,10 +36,10 @@ fig.update_layout(barmode='group', yaxis={'title': 'No of dishonoured cheque'},
 	plot_bgcolor='#b2ebd5')
 
 bound = pd.DataFrame.from_dict({
-	'Year': ['FY22', 'FY22', 'FY22', 'FY22', 'FY22', 'FY22', 'FY22', 'FY22','FY22', 'FY22', 'FY22', 'FY22', 'FY22','FY23'],
-	'Month': ['Apr', 'Apr', 'May', 'Jun','Jul','Jul','Aug','Sep', 'Oct', 'Nov', 'Jan','Jan', 'Feb', 'Apr'],
-	'Bound': ['OB', 'IB', 'OB', 'OB', 'OB', 'IB', 'OB', 'IB','OB', 'OB', 'OB', 'IB', 'OB','OB'],
-	'Volume': [2,2,1,4,1,1,1,1,1,1,2,2,1,1],
+	'Year': ['FY22', 'FY22', 'FY22', 'FY22', 'FY22', 'FY22', 'FY22', 'FY22','FY22', 'FY22', 'FY22', 'FY22', 'FY22','FY23','FY23'],
+	'Month': ['Apr', 'Apr', 'May', 'Jun','Jul','Jul','Aug','Sep', 'Oct', 'Nov', 'Jan','Jan', 'Feb', 'Apr','May'],
+	'Bound': ['OB', 'IB', 'OB', 'OB', 'OB', 'IB', 'OB', 'IB','OB', 'OB', 'OB', 'IB', 'OB','OB','IB'],
+	'Volume': [2,2,1,4,1,1,1,1,1,1,2,2,1,1,1],
 	})
 
 
@@ -49,7 +49,9 @@ fig1.update_layout(margin=dict(l=10, r=10, t=35, b=10), paper_bgcolor='#b2ebd5')
 layout = dbc.Container([
 	dbc.Row([
 		dbc.Col([
-			html.H1(['Dishonoured Cheque As of Apr 22 - Apr 23'], className="text-nowrap text-center text-primary")
+			html.H1(['Dishonoured Cheque As of Apr 22 - May 23'], className="text-nowrap text-center text-primary"),
+			html.P(['Note: If dashboard does not fit your screen, hold CTRL on keyboard and use wheel on your mouse to scroll up or down'],
+				className='text-center')
 			])
 		]),
 	html.Br(),
@@ -93,6 +95,7 @@ layout = dbc.Container([
 				columnDefs = [
 		        {'field': 'Company'},
 		        {'field': 'Bound', "headerClass": 'center-header','cellStyle': {'textAlign': 'center'}}, #headerClass is CSS in assets folder
+		        {'field': 'B/L'},
 		        {'field': 'Amount', 'type': 'rightAligned', "valueFormatter": {"function": 'd3.format("(,.2f")(params.value)'}},
 		        {'field': 'Remark'},
 		        ],
@@ -116,7 +119,7 @@ def update(select_radio, select_year, select_month):
 	dff = df.copy()
 	if select_radio == 'Time Series':
 		figLine = go.Figure(data=[
-		go.Scatter(x=monthYr, y=[4,1,4,2,1,1,1,1,0,4,1,0], line=dict(color=magenta))
+		go.Scatter(x=monthYr, y=vol, line=dict(color=magenta))
 		],
 		layout_yaxis_range=[0,5])
 
