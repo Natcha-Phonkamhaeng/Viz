@@ -57,3 +57,9 @@
 .Select--multi .Select-value {
   color: white;
 }
+
+.collection{
+    background-color: rgba(70,130,180,0.4); /*steelblue*/
+    color: rgb(0,0,0);
+}
+
