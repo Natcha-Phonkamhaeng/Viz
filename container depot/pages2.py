@@ -66,7 +66,7 @@ layout = dbc.Container([
 			dbc.Card(
 				dbc.CardBody([
 					html.H4(children=[html.I(className="bi bi-cash-coin me-2"), "Number of Expire Chq"],className="text-nowrap"),
-					html.H4("1"),
+					html.H4("0"),
 					],className="border-start border-danger border-5"
 					),
 				className='text-center m-4 bg-primary text-white',
@@ -76,7 +76,7 @@ layout = dbc.Container([
 			dbc.Card(
 				dbc.CardBody([
 					html.H4(children=[html.I(className="bi bi-currency-exchange me-2"), "Customer Chq Expire"],className="text-nowrap"),
-					html.H4("ABC Company Limited", className="text-nowrap"),
+					html.H4("-", className="text-nowrap"),
 					],className="border-start border-danger border-5"
 					),
 				className='text-center m-4 bg-primary text-white',
@@ -86,7 +86,7 @@ layout = dbc.Container([
 			dbc.Card(
 				dbc.CardBody([
 					html.H4(children=[html.I(className="bi bi-bank me-2"), "Detail Chq Expire"], className="text-nowrap"),
-					html.H4("1,234.00 / KBank 1234567", className="text-nowrap"),
+					html.H4("-", className="text-nowrap"),
 					],className="border-start border-danger border-5"
 					),
 				className='text-center m-4 bg-primary text-white',
@@ -200,3 +200,11 @@ def download(n_clicks):
 	dff = dff.drop(columns=['Date'])
 	output = dcc.send_data_frame(dff.to_excel, "container deposit.xlsx", sheet_name="Sheet_1", index=False)
 	return output
+
+
+
+
+
+
+
+
