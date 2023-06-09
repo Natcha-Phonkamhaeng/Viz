@@ -6,7 +6,7 @@ import plotly.express as px
 import dash_ag_grid as dag
 import plotly.graph_objects as go
 
-dash.register_page(__name__, path='/page-2', name='Container Deposit')
+dash.register_page(__name__, path='/page-2', name='Container Deposit', order=2)
 
 magenta = '#db0f72'
 dfIdms = pd.read_excel('data/idms2.xlsx')
