@@ -10,7 +10,7 @@ dash.register_page(__name__, path='/page-3', name='AR Collection', order=3)
 
 magenta = '#db0f72'
 
-def change_df(dataframe, location,bank):
+def change_df(dataframe, location, bank):
   mask = (dataframe['Office'] == location) & (dataframe['Bank Account'] == bank)
   return dataframe[mask]
 
@@ -21,74 +21,78 @@ layout = dbc.Container([
 	dbc.Card([
 		dbc.CardBody([
 			dbc.Row([
-				html.H2(['BKK'])
+				html.H2(['BANGKOK'])
 				]),
-			html.Hr(style={'color': 'black', "borderWidth": "0.3vh"}),
+			html.Hr(),
 			dbc.Row([
 				dbc.Col([
-					html.P(['Year']),
-					dcc.Dropdown(options=[2022, 2023], id='bkk_year'),
-					html.P(['Receipt Type'], className='mt-3'),
-					dcc.Dropdown(options=[x for x in df23['Receipt Type'].unique()], id='bkk_type', )
-					], width=2),
+					html.P(['Comparison']),
+					dcc.Dropdown(options=['By Receipt Type', 'By Month', 'By Accumulative'], placeholder='By Receipt Type',id='bkk_type'),
+					html.Hr(),
+					html.P(['Note:']),
+					dcc.Markdown(children='', id='my_note'),
+					], width=3),
 				dbc.Col([
 					dcc.Graph(figure={}, id='bkk_graph_hsbc', className='mb-3'),
 					dcc.Graph(figure={}, id='bkk_graph_bay')
-				],width=10)
-				])
+					], width=9)	
+				])	
 			])
-		], class_name='shadow', style={'background-color': 'rgb(211,211,211)', 'color':'black'})
+		], class_name='shadow', style={'color': 'black'})
 	])
 
-
-# create callback for BKK
+# callback for Bkk location
 @callback(
 	Output('bkk_graph_hsbc', 'figure'),
 	Output('bkk_graph_bay', 'figure'),
-	Input('bkk_year', 'value'),
-	Input('bkk_type', 'value')
+	Output('my_note', 'children'),
+	Input('bkk_type', 'value'),
 	)
-def update_bkk(select_year, select_type):
+def update_bkk_graph(select_type):
 	dfBkk22 = df22.copy()
 	dfBkk23 = df23.copy()
 
-	dfHsbc22 = change_df(dfBkk22, 'BKKBB','HSBC')
-	dfHsbc23 = change_df(dfBkk23, 'BKKBB','HSBC')
+	df = pd.concat([dfBkk22, dfBkk23])
 
-	dfBay22 = change_df(dfBkk22, 'BKKBB','BAY')
-	dfBay23 = change_df(dfBkk23, 'BKKBB','BAY')
+	dfBkkHsbc = change_df(df, 'BKKBB', 'HSBC')
+	dfBkkBay = change_df(df, 'BKKBB', 'BAY')
 
-	figHsbc = go.Figure(data=[
-		go.Bar(name='FY22', 
-			x=dfHsbc22.groupby(['Receipt Type'])[['Total Amount']].sum().reset_index()['Receipt Type'].tolist(), 
-			y=dfHsbc22.groupby(['Receipt Type'])[['Total Amount']].sum().reset_index()['Total Amount'].tolist()),
-		go.Bar(name='FY23', 
-			x=dfHsbc23.groupby(['Receipt Type'])[['Total Amount']].sum().reset_index()['Receipt Type'].tolist(), 
-			y=dfHsbc23.groupby(['Receipt Type'])[['Total Amount']].sum().reset_index()['Total Amount'].tolist())
-		])
-	figHsbc.update_layout(title={'text':'HSBC', 'x': 0.5},barmode='group', paper_bgcolor='rgb(176,196,222)', plot_bgcolor="rgba(0,0,0,0)", font_color='black')
+	dfBkkHsbcRct = dfBkkHsbc.groupby(['Receipt Type', 'Bank Account', 'Year'])[['Total Amount']].agg('sum').reset_index()
+	dfBkkBayRct = dfBkkBay.groupby(['Receipt Type', 'Bank Account', 'Year'])[['Total Amount']].agg('sum').reset_index()
+	
+	#---------------------------- default graph when user select "By Receipt Type"----------------------------
+	figHsbc = px.histogram(dfBkkHsbcRct, x='Receipt Type', y='Total Amount', color='Year', barmode='group')
+	figHsbc.update_layout(title={'text': 'HSBC', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
+					paper_bgcolor='rgb(176,196,222)', 
+					plot_bgcolor="rgba(0,0,0,0)")
 
-	figBay = go.Figure(data=[
-		go.Bar(name='FY22', 
-			x=dfBay22.groupby(['Receipt Type'])[['Total Amount']].sum().reset_index()['Receipt Type'].tolist(), 
-			y=dfBay22.groupby(['Receipt Type'])[['Total Amount']].sum().reset_index()['Total Amount'].tolist()),
-		go.Bar(name='FY23', 
-			x=dfBay23.groupby(['Receipt Type'])[['Total Amount']].sum().reset_index()['Receipt Type'].tolist(), 
-			y=dfBay23.groupby(['Receipt Type'])[['Total Amount']].sum().reset_index()['Total Amount'].tolist())
-		])
-	figBay.update_layout(title={'text':'BAY', 'x': 0.5},barmode='group', paper_bgcolor='rgb(176,196,222)', plot_bgcolor="rgba(0,0,0,0)", font_color='black')
+	figBay = px.histogram(dfBkkBayRct, x='Receipt Type', y='Total Amount', color='Year', barmode='group')
+	figBay.update_layout(title={'text': 'BAY', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
+					paper_bgcolor='rgb(176,196,222)', 
+					plot_bgcolor="rgba(0,0,0,0)")
 
-	if select_year:
-		dfHsbc = pd.concat([dfHsbc22, dfHsbc23])
-		dfHsbc = dfHsbc.groupby(['Month', 'Year'])[['Total Amount']].agg('sum').reset_index()
-		figHsbc = px.line(dfHsbc[dfHsbc['Year'] == select_year], x='Month', y='Total Amount', color='Year', markers=True)
-		figHsbc.update_layout(title={'text':'HSBC: Comparison by Month', 'x': 0.5},barmode='group', paper_bgcolor='rgb(176,196,222)', plot_bgcolor="rgba(0,0,0,0)", font_color='black')
+	note = ['The amount shown is accumulative of Apr-May']
+	
+	if select_type == 'By Receipt Type':
+		return figHsbc, figBay, note
+	elif select_type == 'By Month':
+		dfBkkHsbc = dfBkkHsbc.groupby(['Month', 'Year'])[['Total Amount']].agg('sum').reset_index()
+		dfBkkBay = dfBkkBay.groupby(['Month', 'Year'])[['Total Amount']].agg('sum').reset_index()
 
-		dfBay = pd.concat([dfBay22, dfBay23])
-		dfBay = dfBay.groupby(['Month', 'Year'])[['Total Amount']].agg('sum').reset_index()
-		figBay = px.line(dfBay[dfBay['Year'] == select_year], x='Month', y='Total Amount', color='Year', markers=True)
-		figBay.update_layout(title={'text':'BAY: Comparison by Month', 'x': 0.5},barmode='group', paper_bgcolor='rgb(176,196,222)', plot_bgcolor="rgba(0,0,0,0)", font_color='black')
+		figHsbc = px.histogram(dfBkkHsbc, x='Month', y='Total Amount', color='Year', barmode='group')
+		figHsbc.update_layout(title={'text': 'HSBC', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
+					paper_bgcolor='rgb(176,196,222)', 
+					plot_bgcolor="rgba(0,0,0,0)")
 
-		return figHsbc, figBay
+
+		figBay = px.histogram(dfBkkBay, x='Month', y='Total Amount', color='Year', barmode='group')
+		figBay.update_layout(title={'text': 'BAY', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
+					paper_bgcolor='rgb(176,196,222)', 
+					plot_bgcolor="rgba(0,0,0,0)")
+
+		return figHsbc, figBay, ['']
+
+
 	else:
-		return figHsbc, figBay
+		return figHsbc, figBay, note
+	
