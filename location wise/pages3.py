@@ -6,7 +6,7 @@ import plotly.express as px
 import dash_ag_grid as dag
 import plotly.graph_objects as go
 
-dash.register_page(__name__, path='/page-3', name='AR Collection', order=3)
+dash.register_page(__name__, path='/page-3', name='Location Wise', order=3)
 
 magenta = '#db0f72'
 
@@ -21,38 +21,63 @@ layout = dbc.Container([
 	dbc.Card([
 		dbc.CardBody([
 			dbc.Row([
-				html.H2(['BANGKOK'])
+				dbc.Col([
+					html.H2(['Choose Location'])
+					])
+				]),
+			dbc.Row([
+				dbc.Col([
+					dcc.RadioItems(options=['BKK', 'LCB', 'SGZ'], value='BKK', inline=True, id='my_radio', labelStyle= {"margin":"1rem"}, style={'font-size':30})
+					]),
+				dbc.Col([
+					dcc.Markdown(children='', id='my_location', style={'font-size': 35, 'color':'blue'})
+					])
 				]),
 			html.Hr(),
 			dbc.Row([
 				dbc.Col([
 					html.P(['Comparison']),
-					dcc.Dropdown(options=['By Receipt Type', 'By Month', 'By Accumulative'], placeholder='By Receipt Type',id='bkk_type'),
+					dcc.Dropdown(options=['By Receipt Type', 'By Month', 'By Accumulative'], placeholder='By Receipt Type',id='my_dropdown'),
 					html.Hr(),
 					html.P(['Note:']),
 					dcc.Markdown(children='', id='my_note'),
 					], width=3),
 				dbc.Col([
-					dcc.Graph(figure={}, id='bkk_graph_hsbc', className='mb-3'),
-					dcc.Graph(figure={}, id='bkk_graph_bay')
+					dcc.Graph(figure={}, id='top_graph', className='mb-3'),
+					dcc.Graph(figure={}, id='bottom_graph')
 					], width=9)	
 				])	
 			])
 		], class_name='shadow', style={'color': 'black'})
 	])
 
-# callback for Bkk location
-@callback(
-	Output('bkk_graph_hsbc', 'figure'),
-	Output('bkk_graph_bay', 'figure'),
-	Output('my_note', 'children'),
-	Input('bkk_type', 'value'),
-	)
-def update_bkk_graph(select_type):
-	dfBkk22 = df22.copy()
-	dfBkk23 = df23.copy()
 
-	df = pd.concat([dfBkk22, dfBkk23])
+# callback for header location
+@callback(
+	Output('my_location', 'children'),
+	Input('my_radio', 'value')
+	)
+def update_location(select_location):
+	if select_location == 'BKK':
+		return ['BANGKOK']
+	elif select_location == 'LCB':
+		return ['LAEM CHABANG']
+	else:
+		return ['SONGKHLA']
+
+# callback for update graph
+@callback(
+	Output('top_graph', 'figure'),
+	Output('bottom_graph', 'figure'),
+	Output('my_note', 'children'),
+	Input('my_location', 'children'),
+	Input('my_dropdown', 'value'),
+	)
+def update_graph(select_location, select_type):
+	dff22 = df22.copy()
+	dff23 = df23.copy()
+
+	df = pd.concat([dff22, dff23])
 
 	dfBkkHsbc = change_df(df, 'BKKBB', 'HSBC')
 	dfBkkBay = change_df(df, 'BKKBB', 'BAY')
@@ -72,27 +97,47 @@ def update_bkk_graph(select_type):
 					plot_bgcolor="rgba(0,0,0,0)")
 
 	note = ['The amount shown is accumulative of Apr-May']
-	
-	if select_type == 'By Receipt Type':
-		return figHsbc, figBay, note
-	elif select_type == 'By Month':
-		dfBkkHsbc = dfBkkHsbc.groupby(['Month', 'Year'])[['Total Amount']].agg('sum').reset_index()
-		dfBkkBay = dfBkkBay.groupby(['Month', 'Year'])[['Total Amount']].agg('sum').reset_index()
 
-		figHsbc = px.histogram(dfBkkHsbc, x='Month', y='Total Amount', color='Year', barmode='group')
-		figHsbc.update_layout(title={'text': 'HSBC', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
-					paper_bgcolor='rgb(176,196,222)', 
-					plot_bgcolor="rgba(0,0,0,0)")
+	# 1) BKK Location
+	if select_location == ['BANGKOK']:
+		if select_type == 'By Month':
+			dfBkkHsbc = dfBkkHsbc.groupby(['Month', 'Year'])[['Total Amount']].agg('sum').reset_index()
+			dfBkkBay = dfBkkBay.groupby(['Month', 'Year'])[['Total Amount']].agg('sum').reset_index()
 
+			figHsbc = px.histogram(dfBkkHsbc, x='Month', y='Total Amount', color='Year', barmode='group')
+			figHsbc.update_layout(title={'text': 'HSBC', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
+						paper_bgcolor='rgb(176,196,222)', 
+						plot_bgcolor="rgba(0,0,0,0)")
 
-		figBay = px.histogram(dfBkkBay, x='Month', y='Total Amount', color='Year', barmode='group')
-		figBay.update_layout(title={'text': 'BAY', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
-					paper_bgcolor='rgb(176,196,222)', 
-					plot_bgcolor="rgba(0,0,0,0)")
+			figBay = px.histogram(dfBkkBay, x='Month', y='Total Amount', color='Year', barmode='group')
+			figBay.update_layout(title={'text': 'BAY', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
+						paper_bgcolor='rgb(176,196,222)', 
+						plot_bgcolor="rgba(0,0,0,0)")
+			return figHsbc, figBay, ['']
+		elif select_type == 'By Accumulative':
+			dfBkkHsbc = dfBkkHsbc.groupby(['Month', 'Year'])[['Total Amount']].agg('sum').reset_index()
+			dfBkkHsbc['Accu'] = dfBkkHsbc.groupby('Year').cumsum(numeric_only=True)
 
-		return figHsbc, figBay, ['']
+			figHsbc = go.Figure()
+			figHsbc = figHsbc.add_trace(go.Scatter(x=dfBkkHsbc['Month'].unique().tolist(), y=dfBkkHsbc[dfBkkHsbc['Year'] == 2022]['Accu'].tolist(), name='FY22',fill='tozeroy'))
+			figHsbc = figHsbc.add_trace(go.Scatter(x=dfBkkHsbc['Month'].unique().tolist(), y=dfBkkHsbc[dfBkkHsbc['Year'] == 2023]['Accu'].tolist(), name='FY23',fill='tozeroy'))
+			figHsbc.update_layout(title={'text': 'HSBC', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
+						paper_bgcolor='rgb(176,196,222)', 
+						plot_bgcolor="rgba(0,0,0,0)")
 
+			dfBkkBay = dfBkkBay.groupby(['Month', 'Year'])[['Total Amount']].agg('sum').reset_index()
+			dfBkkBay['Accu'] = dfBkkBay.groupby('Year').cumsum(numeric_only=True)
+
+			figBay = go.Figure()
+			figBay = figBay.add_trace(go.Scatter(x=dfBkkBay['Month'].unique().tolist(), y=dfBkkBay[dfBkkBay['Year'] == 2022]['Accu'].tolist(), name='FY22',fill='tozeroy'))
+			figBay = figBay.add_trace(go.Scatter(x=dfBkkBay['Month'].unique().tolist(), y=dfBkkBay[dfBkkBay['Year'] == 2023]['Accu'].tolist(), name='FY23',fill='tozeroy'))
+			figBay.update_layout(title={'text': 'Bay', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
+						paper_bgcolor='rgb(176,196,222)', 
+						plot_bgcolor="rgba(0,0,0,0)")
+			return figHsbc, figBay, note
+		else: # use default "By Receipt Type"
+			return figHsbc, figBay, note
 
 	else:
-		return figHsbc, figBay, note
+			return figHsbc, figBay, note
 	
