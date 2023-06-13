@@ -5,6 +5,7 @@ import pandas as pd
 import plotly.express as px
 import dash_ag_grid as dag
 import plotly.graph_objects as go
+import numpy as np
 
 dash.register_page(__name__, path='/page-3', name='Location Wise', order=3)
 
@@ -106,7 +107,7 @@ def update_graph(select_location, select_type):
 
 			figHsbc = px.histogram(dfBkkHsbc, x='Month', y='Total Amount', color='Year', barmode='group')
 			figHsbc.update_layout(title={'text': 'HSBC', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
-						paper_bgcolor='rgb(176,196,222)', 
+						paper_bgcolor='rgb(176,196,222)',
 						plot_bgcolor="rgba(0,0,0,0)")
 
 			figBay = px.histogram(dfBkkBay, x='Month', y='Total Amount', color='Year', barmode='group')
@@ -137,6 +138,47 @@ def update_graph(select_location, select_type):
 			return figHsbc, figBay, note
 		else: # use default "By Receipt Type"
 			return figHsbc, figBay, note
+
+	# 2) LCB Location
+	elif select_location == ['LAEM CHABANG']:
+		dfLcb = change_df(df,'LCBBB', 'BAY')
+		dfLcb.insert(6,'Bank', np.nan)
+		mask = (dfLcb['Receipt Type'] == 'CHQ') | (dfLcb['Receipt Type'] == 'CSH')
+		dfLcb.loc[mask, ['Bank']] = 'BILL'
+		dfLcb.loc[~mask, ['Bank']] = 'SAVING'
+		dfLcbGroup = dfLcb.groupby(['Receipt Type', 'Bank Account', 'Year'])[['Total Amount']].agg('sum').reset_index()
+		
+		fig = px.histogram(dfLcbGroup, x='Receipt Type', y='Total Amount', color='Year', barmode='group')
+		fig.update_layout(title={'text': 'LCB', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
+					paper_bgcolor='rgb(176,196,222)', 
+					plot_bgcolor="rgba(0,0,0,0)")
+		
+		fig1 = px.icicle(dfLcb, path=[px.Constant('BAY'), 'Bank', 'Year', 'Receipt Type'], values='Total Amount', color='Total Amount')
+		fig1.update_layout(title={'text': 'LCB', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
+					paper_bgcolor='rgb(176,196,222)', 
+					plot_bgcolor="rgba(0,0,0,0)",
+					margin=dict(t=0, l=0, r=0, b=0))
+
+		if select_type == 'By Receipt Type':
+			return fig, fig1, note
+		elif select_type == 'By Month':
+			dfLcbGroup = dfLcb.groupby(['Year', 'Month'])[['Total Amount']].agg('sum').reset_index()
+			fig = px.histogram(dfLcbGroup, x='Month', y='Total Amount', color='Year', barmode='group')
+			fig.update_layout(title={'text': 'LCB', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
+					paper_bgcolor='rgb(176,196,222)', 
+					plot_bgcolor="rgba(0,0,0,0)")
+
+			fig1 = px.icicle(dfLcb, path=[px.Constant('BAY'), 'Bank', 'Year', 'Month'], values='Total Amount', color='Total Amount')
+			fig1.update_layout(title={'text': 'LCB', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
+					paper_bgcolor='rgb(176,196,222)', 
+					plot_bgcolor="rgba(0,0,0,0)",
+					margin=dict(t=0, l=0, r=0, b=0))
+			return fig, fig1, ['']
+
+		else:
+			return fig, fig1, note
+
+
 
 	else:
 			return figHsbc, figBay, note
