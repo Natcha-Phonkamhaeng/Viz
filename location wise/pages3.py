@@ -3,7 +3,6 @@ import dash_bootstrap_components as dbc
 from dash import Dash, html, Output, Input, dcc, dash_table, callback
 import pandas as pd
 import plotly.express as px
-import dash_ag_grid as dag
 import plotly.graph_objects as go
 import numpy as np
 
@@ -203,7 +202,7 @@ def update_graph(select_location, select_type):
 					paper_bgcolor='rgb(176,196,222)', 
 					plot_bgcolor="rgba(0,0,0,0)")
 		
-		fig1 = px.icicle(dfLcb, path=[px.Constant('BAY'), 'Bank', 'Year', 'Receipt Type'], values='Total Amount', color='Total Amount')
+		fig1 = px.icicle(dfLcb, path=[px.Constant('BAY'), 'Bank', 'Year', 'Receipt Type'], values='Total Amount')
 		fig1.update_layout(title={'text': 'LCB', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
 					paper_bgcolor='rgb(176,196,222)', 
 					plot_bgcolor="rgba(0,0,0,0)",
@@ -216,7 +215,7 @@ def update_graph(select_location, select_type):
 					paper_bgcolor='rgb(176,196,222)', 
 					plot_bgcolor="rgba(0,0,0,0)")
 
-			fig1 = px.icicle(dfLcb, path=[px.Constant('BAY'), 'Bank', 'Year', 'Month'], values='Total Amount', color='Total Amount')
+			fig1 = px.icicle(dfLcb, path=[px.Constant('BAY'), 'Bank', 'Year', 'Month'], values='Total Amount')
 			fig1.update_layout(title={'text': 'LCB', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
 					paper_bgcolor='rgb(176,196,222)', 
 					plot_bgcolor="rgba(0,0,0,0)",
@@ -260,7 +259,7 @@ def update_graph(select_location, select_type):
 					paper_bgcolor='rgb(176,196,222)', 
 					plot_bgcolor="rgba(0,0,0,0)")
 
-			fig1 = px.icicle(dfSgz, path=[px.Constant('BAY'), 'Year', 'Month'], values='Total Amount', color='Total Amount')
+			fig1 = px.icicle(dfSgz, path=[px.Constant('BAY'), 'Year', 'Month'], values='Total Amount')
 			fig1.update_layout(title={'text': 'SGZ', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
 					paper_bgcolor='rgb(176,196,222)', 
 					plot_bgcolor="rgba(0,0,0,0)",
@@ -281,7 +280,7 @@ def update_graph(select_location, select_type):
 						paper_bgcolor='rgb(176,196,222)', 
 						plot_bgcolor="rgba(0,0,0,0)")
 
-			fig1 = px.icicle(dfSgz, path=[px.Constant('BAY'), 'Year', 'Month'], values='Total Amount', color='Total Amount')
+			fig1 = px.icicle(dfSgz, path=[px.Constant('BAY'), 'Year', 'Month'], values='Total Amount')
 			fig1.update_layout(title={'text': 'SGZ', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
 					paper_bgcolor='rgb(176,196,222)', 
 					plot_bgcolor="rgba(0,0,0,0)",
@@ -294,7 +293,7 @@ def update_graph(select_location, select_type):
 					paper_bgcolor='rgb(176,196,222)', 
 					plot_bgcolor="rgba(0,0,0,0)")
 
-			fig1 = px.icicle(dfSgz, path=[px.Constant('BAY'), 'Year', 'Month'], values='Total Amount', color='Total Amount')
+			fig1 = px.icicle(dfSgz, path=[px.Constant('BAY'), 'Year', 'Month'], values='Total Amount')
 			fig1.update_layout(title={'text': 'SGZ', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
 					paper_bgcolor='rgb(176,196,222)', 
 					plot_bgcolor="rgba(0,0,0,0)",
