@@ -31,7 +31,7 @@ LcbVol.update_layout(title={'text': 'LCB Chq Volume', 'x': 0.5, 'font':{'color':
 
 layout = dbc.Container([
 	dbc.Card([
-		dbc.CardBody([
+		dbc.CardHeader([
 			dbc.Row([
 				dbc.Col([
 					html.H2(['Choose Location'])
@@ -42,10 +42,13 @@ layout = dbc.Container([
 					dcc.RadioItems(options=['BKK', 'LCB', 'SGZ'], value='BKK', inline=True, id='my_radio', labelStyle= {"margin":"1rem"}, style={'font-size':30})
 					]),
 				dbc.Col([
-					dcc.Markdown(children='', id='my_location', style={'font-size': 35, 'color':'blue'})
+					dcc.Markdown(children='', id='my_location', style={'font-size': 35, 'color':'white'})
 					])
-				]),
-			html.Hr(),
+				])
+			],
+			style={'color':'white', 'background-color':magenta}
+			),
+		dbc.CardBody([
 			dbc.Row([
 				dbc.Col([
 					html.P(['Comparison']),
@@ -65,13 +68,10 @@ layout = dbc.Container([
 	html.Br(),
 	html.Br(),
 	dbc.Card([
+		dbc.CardHeader([
+				html.H2(['CHQ Volume'], style={'color':'white', 'text-align':'center'})
+				], style={'background-color': magenta}),
 		dbc.CardBody([
-			dbc.Row([
-				dbc.Col([
-					html.H2(['CHQ Volume'], style={'color':'blue'})
-					], style={'text-align': 'center'})
-				]),
-			html.Hr(),
 			dbc.Row([
 				dbc.Col([
 					dcc.Graph(figure=BkkVol, className='mb-3'),
