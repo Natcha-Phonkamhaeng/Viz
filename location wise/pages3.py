@@ -17,6 +17,17 @@ def change_df(dataframe, location, bank):
 
 df22 = pd.read_csv('data/Location Wise 22.csv')
 df23 = pd.read_csv('data/Location Wise 23.csv')
+dfChqVol = pd.read_excel('data/chq volume.xlsx')
+
+BkkVol = px.histogram(dfChqVol[dfChqVol['location'] == 'BKKBB'], x='month', y='volume', color='year', barmode='group')
+BkkVol.update_layout(title={'text': 'BKK Chq Volume', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
+						paper_bgcolor='rgb(176,196,222)',
+						plot_bgcolor="rgba(0,0,0,0)")
+
+LcbVol = px.histogram(dfChqVol[dfChqVol['location'] == 'LCBBB'], x='month', y='volume', color='year', barmode='group')
+LcbVol.update_layout(title={'text': 'LCB Chq Volume', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
+						paper_bgcolor='rgb(176,196,222)',
+						plot_bgcolor="rgba(0,0,0,0)")
 
 layout = dbc.Container([
 	dbc.Card([
@@ -40,8 +51,8 @@ layout = dbc.Container([
 					html.P(['Comparison']),
 					dcc.Dropdown(options=['By Receipt Type', 'By Month', 'By Accumulative'], placeholder='By Receipt Type',id='my_dropdown'),
 					html.Hr(),
-					html.P(['Note:']),
-					dcc.Markdown(children='', id='my_note'),
+					html.P(['Summary:']),
+					dcc.Markdown(children='', id='my_note',dangerously_allow_html=True),
 					], width=3),
 				dbc.Col([
 					dcc.Graph(figure={}, id='top_graph', className='mb-3'),
@@ -49,7 +60,26 @@ layout = dbc.Container([
 					], width=9)	
 				])	
 			])
-		], class_name='shadow', style={'color': 'black'})
+		], class_name='shadow', style={'color': 'black'}),
+	html.Br(),
+	html.Br(),
+	html.Br(),
+	dbc.Card([
+		dbc.CardBody([
+			dbc.Row([
+				dbc.Col([
+					html.H2(['CHQ Volume'], style={'color':'blue'})
+					], style={'text-align': 'center'})
+				]),
+			html.Hr(),
+			dbc.Row([
+				dbc.Col([
+					dcc.Graph(figure=BkkVol, className='mb-3'),
+					dcc.Graph(figure=LcbVol)
+					])
+				])
+			], class_name='shadow', style={'color': 'black'})
+		])
 	])
 
 
@@ -114,7 +144,19 @@ def update_graph(select_location, select_type):
 			figBay.update_layout(title={'text': 'BAY', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
 						paper_bgcolor='rgb(176,196,222)', 
 						plot_bgcolor="rgba(0,0,0,0)")
-			return figHsbc, figBay, ['']
+			return figHsbc, figBay, ['''\n<p><span style="color: blue">HSBC</span></p>''']+\
+			['''\n**Between FY22-FY23**''']+\
+			['''\n<p><span style="color: red">Apr -53.43%</span>.</p>''']+\
+			['''\n<p><span style="color: red">May -55.10%</span>.</p>''']+\
+			['''\n**In Year 2023**''']+\
+			['''\n<p><span style="color: red">Apr-May -0.30%</span>.</p>''']+\
+			['''\n<p><span style="color: blue">BAY</span></p>''']+\
+			['''\n**Between FY22-FY23**''']+\
+			['''\n<p><span style="color: red">Apr -44.97%</span>.</p>''']+\
+			['''\n<p><span style="color: red">May -38.18%</span>.</p>''']+\
+			['''\n**In Year 2023**''']+\
+			['''\n<p><span style="color: green">Apr-May 17.75%</span>.</p>''']
+
 		elif select_type == 'By Accumulative':
 			dfBkkHsbc = dfBkkHsbc.groupby(['Month', 'Year'])[['Total Amount']].agg('sum').reset_index()
 			dfBkkHsbc['Accu'] = dfBkkHsbc.groupby('Year').cumsum(numeric_only=True)
@@ -137,7 +179,15 @@ def update_graph(select_location, select_type):
 						plot_bgcolor="rgba(0,0,0,0)")
 			return figHsbc, figBay, note
 		else: # use default "By Receipt Type"
-			return figHsbc, figBay, note
+			return figHsbc, figBay, note+\
+			['''\n**HSBC**''']+\
+			['''\n<p><span style="color: red">BTR -58.15%</span>.</p>''']+\
+			['''\n<p><span style="color: red">CHQ -65.05%</span>.</p>''']+\
+			['''\n<p><span style="color: green">E-PAYMENT 21.51%</span>.</p>''']+\
+			['''\n**BAY**''']+\
+			['''\n<p><span style="color: red">BTR -68.03%</span>.</p>''']+\
+			['''\n<p><span style="color: red">CHQ -36.55%</span>.</p>''']+\
+			['''\n<p><span style="color: red">CASH -35.94%</span>.</p>''']
 
 	# 2) LCB Location
 	elif select_location == ['LAEM CHABANG']:
@@ -159,9 +209,7 @@ def update_graph(select_location, select_type):
 					plot_bgcolor="rgba(0,0,0,0)",
 					margin=dict(t=0, l=0, r=0, b=0))
 
-		if select_type == 'By Receipt Type':
-			return fig, fig1, note
-		elif select_type == 'By Month':
+		if select_type == 'By Month':
 			dfLcbGroup = dfLcb.groupby(['Year', 'Month'])[['Total Amount']].agg('sum').reset_index()
 			fig = px.histogram(dfLcbGroup, x='Month', y='Total Amount', color='Year', barmode='group')
 			fig.update_layout(title={'text': 'LCB', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
@@ -173,13 +221,89 @@ def update_graph(select_location, select_type):
 					paper_bgcolor='rgb(176,196,222)', 
 					plot_bgcolor="rgba(0,0,0,0)",
 					margin=dict(t=0, l=0, r=0, b=0))
-			return fig, fig1, ['']
+			return fig, fig1, ['''\n**Between FY22-FY23**''']+\
+			['''\n<p><span style="color: red">Apr -68.17%</span>.</p>''']+\
+			['''\n<p><span style="color: red">May -69.04%</span>.</p>''']+\
+			['''\n**In Year 2023**''']+\
+			['''\n<p><span style="color: green">Apr-May 17.71%</span>.</p>''']
 
-		else:
+		elif select_type == 'By Accumulative':
+			dfLcbGroup = dfLcb.groupby(['Month', 'Year'])[['Total Amount']].agg('sum').reset_index()
+			dfLcbGroup['Accu'] = dfLcbGroup.groupby('Year').cumsum(numeric_only=True)
+			
+			fig = go.Figure()
+			fig.add_trace(go.Scatter(x=dfLcbGroup['Month'].unique().tolist(), y=dfLcbGroup[dfLcbGroup['Year'] == 2022]['Accu'].tolist(), name='FY22',fill='tozeroy'))
+			fig.add_trace(go.Scatter(x=dfLcbGroup['Month'].unique().tolist(), y=dfLcbGroup[dfLcbGroup['Year'] == 2023]['Accu'].tolist(), name='FY23',fill='tozeroy'))
+			fig.update_layout(title={'text': 'Bay', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
+						paper_bgcolor='rgb(176,196,222)', 
+						plot_bgcolor="rgba(0,0,0,0)")
+
+			fig1 = px.histogram(dfLcb, x='Bank', y='Total Amount', color='Year', barmode='group')
+			fig1.update_layout(title={'text': 'LCB', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
+					paper_bgcolor='rgb(176,196,222)', 
+					plot_bgcolor="rgba(0,0,0,0)")
 			return fig, fig1, note
+		else: # default By Receipt Type
+			return fig, fig1, note+\
+			['''\n**LCB**''']+\
+			['''\n<p><span style="color: red">BTR -68.53%</span>.</p>''']+\
+			['''\n<p><span style="color: red">CHQ -69.31%</span>.</p>''']+\
+			['''\n<p><span style="color: red">CASH -81.28%</span>.</p>''']
 
+	# 3) Songkhla Location
+	elif select_location == ['SONGKHLA']:
+		dfSgz = change_df(df,'SGZBB', 'BAY')
+		if select_type == 'By Month':
+			dfSgzGroup = dfSgz.groupby(['Year', 'Month'])[['Total Amount']].agg('sum').reset_index()
+			fig = px.histogram(dfSgzGroup, x='Month', y='Total Amount', color='Year', barmode='group')
+			fig.update_layout(title={'text': 'SGZ', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
+					paper_bgcolor='rgb(176,196,222)', 
+					plot_bgcolor="rgba(0,0,0,0)")
 
+			fig1 = px.icicle(dfSgz, path=[px.Constant('BAY'), 'Year', 'Month'], values='Total Amount', color='Total Amount')
+			fig1.update_layout(title={'text': 'SGZ', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
+					paper_bgcolor='rgb(176,196,222)', 
+					plot_bgcolor="rgba(0,0,0,0)",
+					margin=dict(t=0, l=0, r=0, b=0))
+			return fig, fig1, ['''\n**Between FY22-FY23**''']+\
+			['''\n<p><span style="color: red">Apr -56.15%</span>.</p>''']+\
+			['''\n<p><span style="color: red">May -28.66%</span>.</p>''']+\
+			['''\n**In Year 2023**''']+\
+			['''\n<p><span style="color: green">Apr-May 51.34%</span>.</p>''']
+		elif select_type == 'By Accumulative':
+			dfSgzGroup = dfSgz.groupby(['Month', 'Year'])[['Total Amount']].agg('sum').reset_index()
+			dfSgzGroup['Accu'] = dfSgzGroup.groupby('Year').cumsum(numeric_only=True)
+			
+			fig = go.Figure()
+			fig.add_trace(go.Scatter(x=dfSgzGroup['Month'].unique().tolist(), y=dfSgzGroup[dfSgzGroup['Year'] == 2022]['Accu'].tolist(), name='FY22',fill='tozeroy'))
+			fig.add_trace(go.Scatter(x=dfSgzGroup['Month'].unique().tolist(), y=dfSgzGroup[dfSgzGroup['Year'] == 2023]['Accu'].tolist(), name='FY23',fill='tozeroy'))
+			fig.update_layout(title={'text': 'Bay', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
+						paper_bgcolor='rgb(176,196,222)', 
+						plot_bgcolor="rgba(0,0,0,0)")
+
+			fig1 = px.icicle(dfSgz, path=[px.Constant('BAY'), 'Year', 'Month'], values='Total Amount', color='Total Amount')
+			fig1.update_layout(title={'text': 'SGZ', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
+					paper_bgcolor='rgb(176,196,222)', 
+					plot_bgcolor="rgba(0,0,0,0)",
+					margin=dict(t=0, l=0, r=0, b=0))
+			return fig, fig1, note
+		else: # By Receipt Type
+			dfSgzGroup = dfSgz.groupby(['Receipt Type', 'Bank Account', 'Year'])[['Total Amount']].agg('sum').reset_index()
+			fig = px.histogram(dfSgzGroup, x='Receipt Type', y='Total Amount', color='Year', barmode='group')
+			fig.update_layout(title={'text': 'SGZ', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
+					paper_bgcolor='rgb(176,196,222)', 
+					plot_bgcolor="rgba(0,0,0,0)")
+
+			fig1 = px.icicle(dfSgz, path=[px.Constant('BAY'), 'Year', 'Month'], values='Total Amount', color='Total Amount')
+			fig1.update_layout(title={'text': 'SGZ', 'x': 0.5, 'font':{'color':'blue', 'size': 25}}, 
+					paper_bgcolor='rgb(176,196,222)', 
+					plot_bgcolor="rgba(0,0,0,0)",
+					margin=dict(t=0, l=0, r=0, b=0))
+			return fig, fig1, note+\
+			['''\n**SGZ**''']+\
+			['''\n<p><span style="color: red">BTR -42.91%</span>.</p>''']
 
 	else:
 			return figHsbc, figBay, note
+	
 	
