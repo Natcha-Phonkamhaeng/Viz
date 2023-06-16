@@ -20,7 +20,7 @@ layout = dbc.Container([
 					dbc.Row([
 						dbc.Col([
 							html.H3(['Missed Call'], style={'color':'red'}),
-							dcc.Markdown(children=['''# 18'''], id='miss_number', style={'color': 'red'})
+							html.H3(children='', id='miss_number', style={'color':'red'})
 							])
 						], 
 						style={'text-align':'center'})
@@ -48,7 +48,7 @@ layout = dbc.Container([
 		dbc.Col([
 			dbc.Card([
 				dbc.CardBody([
-					dcc.Graph(id='bar_chart')
+					dcc.Graph(figure={}, id='bar_chart')
 					])
 				],
 				class_name='shadow'
@@ -65,4 +65,22 @@ layout = dbc.Container([
 			])
 		])
 	])
+
+@callback(
+	Output('miss_number', 'children'),
+	Output('bar_chart', 'figure'),
+	Input('dropdown_call', 'value')
+	)
+def update_graph(select_call):
+	dff = df.copy()
+
+	figBar = px.bar(dff, x='Volume', y='Name', color='Call In', orientation='h')
+
+	if select_call:
+		mask = (dff['Call In'] == select_call) & (dff['Name'] == 'Missed call')
+		missCall = list(dff[mask]['Volume'])
+		missCall = [str(x) for x in missCall][0]
+		return missCall, figBar
+	else:
+		return [''], figBar
 	
