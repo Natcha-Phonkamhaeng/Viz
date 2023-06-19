@@ -25,7 +25,7 @@ ar_guage = go.Figure(go.Indicator(
     domain = {'x': [0, 1], 'y': [0, 1]},
     value = 0.06, # this value will be change according to AR Dashboard
     mode = "gauge+number",
-    title = {'text': "AR >60 days KPI : Exceeds Expectations", 'font': {'color':'green'}},
+    title = {'text': "AR >60 days KPI : Exceeds Expectations", 'font': {'color':'green', 'size': 28}},
     gauge = {'axis': {'range': [None, 2]},
 			'bar': {'color': magenta},
             'steps' : [
@@ -35,13 +35,13 @@ ar_guage = go.Figure(go.Indicator(
                  {'range': [1.70, 2], 'color': "red"},
                  ],
              'threshold' : {'line': {'color': "blue", 'width': 4}, 'thickness': 0.75, 'value': 1.7}}))
-ar_guage.update_layout(margin=dict(l=0, r=0, t=0, b=0),font={'color':'green'})
+ar_guage.update_layout(margin=dict(l=0, r=0, t=0, b=0),font={'color':'green'},paper_bgcolor = "lavender")
 
 overdue_guage = go.Figure(go.Indicator(
     domain = {'x': [0, 1], 'y': [0, 1]},
     value = 25, # this value will be change according to AR Dashboard
     mode = "gauge+number",
-    title = {'text': "Overdue Ratio KPI : Unsatisfactory", 'font': {'color':'red'}},
+    title = {'text': "Overdue Ratio KPI : Unsatisfactory", 'font': {'color':'red', 'size': 30}},
     gauge = {'axis': {'range': [None, 25]},
              'bar': {'color': magenta},
              'steps' : [
@@ -52,7 +52,7 @@ overdue_guage = go.Figure(go.Indicator(
                  {'range': [23, 25], 'color': "red"},
                  ],
              'threshold' : {'line': {'color': "blue", 'width': 4}, 'thickness': 0.75, 'value': 23}}))
-overdue_guage.update_layout(margin=dict(l=0, r=0, t=0, b=0), font={'color':'red'})
+overdue_guage.update_layout(margin=dict(l=0, r=0, t=0, b=0), font={'color':'red'},paper_bgcolor = "lavender")
 
 layout = dbc.Container([
 	html.Label(['Remark: Aging as at 01 May 2023'], className='mb-4'),
@@ -86,10 +86,18 @@ layout = dbc.Container([
 		]),
 	dbc.Row([
 		dbc.Col([
-			dcc.Graph(figure=ar_guage)
+			dbc.Card([
+				dbc.CardBody([
+					dcc.Graph(figure=ar_guage)
+					], class_name='shadow')
+				], style={'background-color': 'lavender'})
 			]),
 		dbc.Col([
-			dcc.Graph(figure=overdue_guage)
+			dbc.Card([
+				dbc.CardBody([
+					dcc.Graph(figure=overdue_guage)
+					], class_name='shadow')
+				], style={'background-color': 'lavender'})
 			])
 		])
 	])
