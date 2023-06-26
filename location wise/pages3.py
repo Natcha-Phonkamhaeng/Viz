@@ -57,8 +57,8 @@ layout = dbc.Container([
 					dcc.Markdown(children='', id='my_note',dangerously_allow_html=True),
 					], width=3),
 				dbc.Col([
-					dcc.Graph(figure={}, id='top_graph', className='mb-3'),
-					dcc.Graph(figure={}, id='bottom_graph')
+					dcc.Loading(children=[dcc.Graph(figure={}, id='top_graph', className='mb-3')]),
+					dcc.Loading(children=[dcc.Graph(figure={}, id='bottom_graph')])
 					], width=9)	
 				])	
 			])
@@ -304,5 +304,6 @@ def update_graph(select_location, select_type):
 
 	else:
 			return figHsbc, figBay, note
+	
 	
 	
